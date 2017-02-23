@@ -1,0 +1,25 @@
+Partlist
+
+Exported from room-therm.brd at 2016. 12. 12. 17:42
+
+EAGLE Version 7.6.0 Copyright (c) 1988-2016 CadSoft
+
+Assembly variant: 
+
+Part     Value          Package    Library        Position (mm)         Orientation
+
+C1       100n           C1005      eagle-ltspice  (56.74 52.9)          MR180
+C2       100u           E2-4       resistor       (54.5 48.83)          R90
+C3       100n           C1005      eagle-ltspice  (56.6 54.3)           MR180
+JP1      J1             JP1        jumper         (72 74)               R90
+R1       12k            R0805      rcl            (72.12 67.88)         MR180
+R2       12k            R0805      rcl            (44.17 56.15)         MR270
+R3       12k            R0805      rcl            (71.36 55.79)         MR180
+R4       12k            R0805      rcl            (50.36 51.15)         MR270
+R5       12k            R0805      rcl            (43.23 50.91)         MR180
+R6       470            R0805      rcl            (42.58 67.42)         MR180
+U$1      ESP12          ESP12      esp8266modules (58.9 68.2)           MR0
+X1       250-106        P-250-106  con-wago_250   (36.64 55.2)          R0
+X2       250-106        P-250-106  con-wago_250   (82.02 59.8)          R180
+X3       22-23-2031     22-23-2031 con-molex      (40.58 70.93)         R0
+X4       250-102        P-250-102  con-wago_250   (67.71 47.86)         R90

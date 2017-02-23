@@ -1,0 +1,264 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8 width=device-width, initial-scale=1.0"">
+<script src = "https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script>
+	var mainCtr, hidegCtr, melegCtr, mainTimer;
+	var maxIdo = 30;
+	var maxCiklus = 12;
+	var stCurr, stNext;
+  $( document ).ready(function() {
+				console.log( "document loaded" );
+				var allInput = $( "input" );
+				var arr = jQuery.makeArray( allInput );
+				$("#Stop").prop('disabled', true);
+				$("#Start").prop('disabled', false);
+			//	console.log(allInput);
+			//	console.log(arr);
+				});
+
+	$( window ).load(function() {
+		$( "#Stop"		).on( "click", stopCount);
+		$( "#Start"		).on( "click", startCount);
+		setInterval(getStatus, 7000);
+		console.log( "window loaded" );
+		getStatus();
+   }); // $( window ).load(function()
+
+function stopCount(){
+// fő időzítő ciklus megállítása
+	if (mainTimer != null) {
+		clearInterval(mainTimer);
+		mainTimer = null;
+		$.get("/?kezeles=0", fillform );
+	}
+	$('#ctrHideg').val( "0" );
+	$('#ctrMain').html( "0" );
+	$('#ctrMeleg').val( "0" );
+	$("#Stop").prop('disabled', true);
+	$("#Start").prop('disabled', false);
+	
+}
+
+	
+function startCount(){
+	
+	if (mainTimer != null) {
+		stopCount(); 
+	}	
+	mainTimer = setInterval(therapyLoop, 1000);
+	// therapy loop inicializálás
+	hidegCtr = maxIdo;
+	melegCtr = maxIdo;
+	mainCtr = 1 ;
+	stCurr = "hideg"
+	stNext = "hideg";
+	$('#ctrHideg').val( hidegCtr );
+	$('#ctrMain').html( mainCtr );
+	$("#Stop").prop('disabled', false);
+	$("#Start").prop('disabled', true);
+	$.get("/?kezeles=1", fillform );
+}
+
+function therapyLoop(){
+	// a fő időzítő ciklus
+	stCurr = stNext;
+	if (stCurr == "hideg") { // hideg ciklusban vagyunk
+			hidegCtr -= 1;
+			$('#ctrHideg').val( hidegCtr );
+			if (hidegCtr <= 0) {
+				hidegCtr = maxIdo;
+				stNext = "meleg";
+						}
+	} else if (stCurr == "meleg") {
+			melegCtr -= 1;
+			$('#ctrMeleg').val( melegCtr );
+			if (melegCtr <= 0) {
+					mainCtr +=1;
+				if (mainCtr > maxCiklus){ // kész a 12 ismétlés
+					stopCount();
+					alert("Kezelés kész, jobbulást kívánok!")
+				} else {
+					$('#ctrMain').html( mainCtr );
+					melegCtr = maxIdo;
+					stNext = "hideg";
+				}
+			}
+	
+	}
+}
+
+function getStatus(){
+		$('#process-status').html( "Frissítés...");
+		$.get("/?status=1", fillform );
+	}
+
+function fillform(ertekek){
+	$('#process-status').html(ertekek);
+	if (ertekek.slice(0,10) !=' {"hideg_T') { 
+		// nem jo valasz jott, ezert lecsereljuk egy defaultra
+			ertekek = '{"hideg_T":0, "meleg_T":0, "para":0, "hom":0}';
+	}	else {
+		// ha nem jol jön debug miatt, akkor itt helyre tesszük
+		ertekek=ertekek.slice(0, ertekek.search("}")+1);
+	}
+	env = JSON.parse(ertekek);
+	$( "#hideg").html( env.hideg_T + "C" );
+	$( "#meleg").html( env.meleg_T + "C" );
+	$( "#para" ).html( env.para/10 + "%");
+	$( "#hom"  ).html( env.hom/10 + "C");
+}
+
+  // kitölti a táblázatot a zoncfg adatokkal
+function filltable(data) {
+	// $('#process-status').html(data);
+  zonecfg = data.split("\n");
+  var zonetable;
+  var datum;
+	var stido;
+	var zona = 'string';
+	var interv;
+	if (zonecfg[0] =="Mon") {
+		$( "input[type='checkbox']").prop('checked', false); // összes checkbox nullázása
+		for (i = 0; i < zonecfg.length-1; i++) {
+			if (/[a-z|A-z]+/.test(zonecfg[i]) ) {
+				datum = /[a-z|A-z]+/.exec(zonecfg[i]);
+				console.log("nap found:" + datum);
+			} else {
+				stido = /[0-9]{2}:[0-9]{2}/.exec(zonecfg[i]);
+				zona = /,[0-9]{1},/.exec(zonecfg[i]);
+				str= zona.toString();
+				str = str.substr(1,1);
+				interv = /[0-9]+$/.exec(zonecfg[i]);
+				$( "input[id=\'" + datum +"\'][name=\'wd"+ str +"\']").prop('checked', true); //checkbox
+				$( "input[id=\'start" + str +"\']").val(stido); // start time
+				$( "input[id=\'interv" + str +"\']").val("00:"+interv); // interval
+			}
+		}
+	}
+}
+
+   </script>
+<style>
+@media (min-width:700px) {
+	
+	.col{
+	position:relative;
+	margin-bottom:0.3em;
+	float: left;
+}
+	
+.col-1{
+	width:30%;
+	}
+
+.col-2{
+	width:50%;
+	}
+.col-3{
+	width:50%;
+	}
+.col-4{
+	width:50%;
+	}
+	.progr{
+		width:90%;
+		}
+
+}
+
+.temp{
+	 font-size: 30px;
+	  background-color: #aa9900;
+	  width: 180px;
+    height: 70px;
+
+}
+
+.row,.col {
+	box-sizing:border-box;
+}
+.row:after {
+	clear:both
+}
+.row:before,.row:after {
+	display:table;
+	content:" "
+}
+
+.padding {
+	display:inline-block;
+	padding:10px;
+}
+
+button{
+     border-radius: 12px;
+     background-color: #aa0044;
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 30px;
+    margin: 10px 24px;
+    cursor: pointer;
+    width: 78%;
+}
+
+body {
+			font: 1.2em arial, helvetica, sans-serif;
+		}
+
+		h1 {
+			margin: 0;
+			padding: 0 0 1em 0;
+		}
+</style>
+</head>
+<body>
+<h1> ESP-8266 Váltófürdő kezelés</h1>
+
+<div class="row">
+	<div class="col col-1">	
+		<progress  class="progr" id="ctrHideg" value="30" max="30"></progress>
+	</div>	
+		<div class = "col col-1">
+		<button class="button" type="button" id="ctrMain" style="background-color:#0099aa">00</button>
+	</div>
+	<div class="col col-1 button">	
+		<progress  class="progr" id="ctrMeleg" value="0" max="30" style="color:red"></progress>
+	</div>	
+</div>
+
+<div class="row">
+	<div class="col col-2">	
+		Hideg:<button class="temp  col-2" id="hideg" style="display:inline-block">20.0</button>
+	</div>
+	<div class="col col-2">	
+		Meleg:<button class="temp  col-2" id="meleg" > 20.0 C</button>
+	</div>
+</div>
+
+<div class="row">
+	<div class = "col col-3">
+		Szoba:<button class="temp " id="hom">20.0 C</button>
+	</div>
+	<div class = "col col-3">
+		Pára<button class="temp " id="para" > 20.0 %</button>
+	</div>
+</div>
+
+<div class="row">
+	<div class = "col col-4">
+		<button class="" type="button" id="Start" >Start</button>
+	</div>
+	<div class = "col col-4">
+		<button class="" type="button" id="Stop" disabled='disabled'>Stop</button>
+	</div>
+
+</div>
+<pre id="process-status"></pre>
+</form>
+</body>
+</html>
